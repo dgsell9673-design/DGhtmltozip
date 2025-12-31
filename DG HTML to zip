@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DG HTML to ZIP</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #00d2ff;
+            --secondary-color: #3a7bd5;
+            --bg-dark: #1e1e2f;
+            --card-bg: #2b2b3d;
+            --text-light: #ffffff;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            padding: 20px; 
+            background: var(--bg-dark); 
+            color: var(--text-light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container { 
+            width: 100%;
+            max-width: 500px; 
+            background: var(--card-bg); 
+            padding: 30px; 
+            border-radius: 15px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+            border: 1px solid #444;
+        }
+
+        h2 { 
+            text-align: center; 
+            color: var(--primary-color);
+            margin-bottom: 25px;
+            font-size: 24px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        label { display: block; margin-bottom: 8px; font-size: 14px; color: #bbb; }
+
+        input, textarea { 
+            width: 100%; 
+            background: #1e1e2f;
+            color: white;
+            padding: 12px; 
+            margin-bottom: 20px; 
+            border: 1px solid #444; 
+            border-radius: 8px; 
+            box-sizing: border-box;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input:focus, textarea:focus { border-color: var(--primary-color); }
+
+        textarea { height: 180px; resize: vertical; font-family: monospace; }
+
+        .btn-group { display: flex; gap: 10px; }
+
+        /* Button and Link styling */
+        .btn { 
+            flex: 1;
+            padding: 15px; 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 16px; 
+            font-weight: bold;
+            text-align: center;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+
+        .clear-btn { background: #555; }
+        .download-btn { background: linear-gradient(135deg, var(--secondary-color), var(--primary-color)); }
+
+        .btn:active { transform: scale(0.98); }
+        .btn:hover { opacity: 0.9; }
+
+        footer { text-align: center; margin-top: 20px; font-size: 12px; color: #666; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>DG HTML to ZIP</h2>
+    
+    <label>File ka naam rakhein:</label>
+    <input type="text" id="fileName" placeholder="example.html" value="index.html">
+    
+    <label>HTML Code Paste Karein:</label>
+    <textarea id="htmlCode" placeholder="<html>...</html>"></textarea>
+    
+    <div class="btn-group">
+        <button class="btn clear-btn" onclick="clearAll()">Clear</button>
+        <a href="https://dgsell9673-design.github.io/DGhtmltozip/" class="btn download-btn" onclick="checkCode(event)">Download ZIP</a>
+    </div>
+
+    <footer>Powered by DG Tools</footer>
+</div>
+
+<script>
+    function clearAll() {
+        document.getElementById('htmlCode').value = '';
+        document.getElementById('fileName').value = 'index.html';
+    }
+
+    function checkCode(event) {
+        const code = document.getElementById('htmlCode').value;
+        
+        if (!code.trim()) {
+            alert("Kripya pehle HTML code paste karein!");
+            event.preventDefault(); // Agar code nahi hai toh redirect nahi hoga
+            return;
+        }
+        
+        // Code ko memory mein save kar rahe hain taaki agar website handle kar sake toh use kare
+        localStorage.setItem('temp_html_code', code);
+        localStorage.setItem('temp_file_name', document.getElementById('fileName').value);
+    }
+</script>
+
+</body>
+</html>
