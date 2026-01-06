@@ -3,45 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DG SERVICE - GOD MODE PANEL</title>
+    <title>DG SERVICE - GOD MODE</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
     <style>
         html, body { height: 100%; overscroll-behavior: none; background-color: #020617; color: white; font-family: 'Inter', sans-serif; }
-        #mainContainer { height: calc(100vh - 128px); overflow-y: auto; }
-        .glass { background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(10px); border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); }
+        #mainContainer { height: calc(100vh - 128px); overflow-y: auto; perspective: 1000px; }
+        .glass { background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(10px); border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); transition: transform 0.6s; transform-style: preserve-3d; }
         .neo-input { background: #0a0f1d; border: 1px solid #1e293b; color: white; border-radius: 12px; padding: 12px; width: 100%; outline: none; }
         .tab-content { display: none; }
-        .tab-content.active { display: block; }
+        .tab-content.active { display: block; animation: flipInX 0.8s; }
+        
+        /* Flip Animation */
+        @keyframes flipInX {
+            from { transform: rotateX(90deg); opacity: 0; }
+            to { transform: rotateX(0deg); opacity: 1; }
+        }
+        .flip-card:hover { transform: rotateY(10deg); }
     </style>
 </head>
 <body>
 
 <div id="loading" class="fixed inset-0 bg-[#020617] z-[99999] flex flex-col items-center justify-center">
     <div class="animate-spin rounded-full h-10 w-10 border-b-4 border-blue-600 mb-4"></div>
-    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Initializing GOD MODE...</p>
+    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest animate__animated animate__pulse animate__infinite">Initializing DG GOD MODE...</p>
 </div>
 
 <div id="authScreen" class="hidden fixed inset-0 bg-[#020617] z-[50000] overflow-y-auto p-6">
-    <div class="max-w-md mx-auto space-y-6 pt-10 pb-10">
+    <div class="max-w-md mx-auto space-y-6 pt-10 animate__animated animate__fadeInDown">
         <h1 class="text-4xl font-black italic text-blue-500 uppercase text-center">DG SERVICE</h1>
-        <div class="glass p-6 space-y-4 text-center">
-            <p class="text-[10px] text-gray-400 font-black uppercase">Email Authentication</p>
+        <div class="glass p-6 space-y-4 text-center flip-card">
+            <p class="text-[10px] text-gray-400 font-black uppercase">Secure Login</p>
             <input type="email" id="email" placeholder="Email Address" class="neo-input text-xs">
             <input type="password" id="pass" placeholder="Password" class="neo-input text-xs">
             <div class="grid grid-cols-2 gap-2">
-                <button onclick="emailLogin()" class="bg-blue-600 py-3 rounded-xl font-black text-[10px] uppercase">Login</button>
-                <button onclick="emailSignup()" class="bg-slate-800 py-3 rounded-xl font-black text-[10px] uppercase border border-white/10">Sign Up</button>
+                <button onclick="emailLogin()" class="bg-blue-600 py-3 rounded-xl font-black text-[10px] uppercase hover:scale-105 transition">Login</button>
+                <button onclick="emailSignup()" class="bg-slate-800 py-3 rounded-xl font-black text-[10px] uppercase border border-white/10 hover:scale-105 transition">Sign Up</button>
             </div>
-            <p class="text-[10px] text-gray-500 uppercase font-bold py-2">OR</p>
             <div id="recaptcha-container"></div>
             <div class="flex gap-2">
-                <input type="tel" id="phone" placeholder="+91XXXXXXXXXX" class="neo-input text-xs flex-1">
+                <input type="tel" id="phone" placeholder="+91..." class="neo-input text-xs flex-1">
                 <button onclick="phoneLogin()" class="bg-blue-600 px-4 rounded-xl font-black text-[10px] uppercase">OTP</button>
             </div>
-            <input type="number" id="otp" placeholder="Enter OTP" class="neo-input text-xs w-full mt-2">
-            <button onclick="verifyOTP()" class="w-full bg-green-600 py-3 rounded-xl font-black text-[10px] uppercase mt-2">Verify & Login</button>
-            <button onclick="googleLogin()" class="w-full bg-white text-black py-4 rounded-xl font-black text-[10px] uppercase flex items-center justify-center gap-2 mt-4">
+            <input type="number" id="otp" placeholder="OTP" class="neo-input text-xs w-full mt-2 hidden">
+            <button id="verifyBtn" onclick="verifyOTP()" class="w-full bg-green-600 py-3 rounded-xl font-black text-[10px] uppercase mt-2 hidden">Verify</button>
+            <div class="h-[1px] bg-white/10 my-4"></div>
+            <button onclick="googleLogin()" class="w-full bg-white text-black py-4 rounded-xl font-black text-[10px] uppercase flex items-center justify-center gap-2 hover:bg-gray-200 transition">
                 <img src="https://www.google.com/favicon.ico" class="w-4"> Continue with Google
             </button>
         </div>
@@ -50,17 +58,20 @@
 
 <div id="appScreen" class="hidden h-full flex flex-col">
     <header class="bg-slate-900/80 p-4 flex justify-between items-center border-b border-white/5 sticky top-0 z-50">
-        <div class="flex flex-col">
-            <span id="userName" class="text-[10px] font-bold text-blue-400 uppercase">User</span>
-            <h1 class="font-black italic text-white uppercase text-sm">DG SERVICE</h1>
+        <div class="flex items-center gap-3">
+            <img id="headerImg" class="w-8 h-8 rounded-full border border-blue-500" src="">
+            <div class="flex flex-col">
+                <span id="userName" class="text-[9px] font-bold text-blue-400 uppercase">User</span>
+                <h1 class="font-black italic text-white uppercase text-xs">DG SERVICE</h1>
+            </div>
         </div>
-        <div class="bg-blue-600/10 px-4 py-1 rounded-full text-green-400 font-bold" id="balance">₹0.00</div>
+        <div class="bg-blue-600/10 px-4 py-1 rounded-full text-green-400 font-bold animate__animated animate__fadeInRight" id="balance">₹0.00</div>
     </header>
 
     <main id="mainContainer" class="p-4 pb-24">
         <div id="homeTab" class="tab-content active space-y-4">
-            <div class="glass p-5 space-y-4">
-                <h3 class="text-[10px] font-black text-blue-500 uppercase tracking-widest">New Order</h3>
+            <div class="glass p-5 space-y-4 flip-card">
+                <h3 class="text-[10px] font-black text-blue-500 uppercase tracking-widest">Create Order</h3>
                 <div class="space-y-1">
                     <label class="text-[9px] font-bold text-gray-400 uppercase">Category</label>
                     <select id="catSelect" onchange="filterServices()" class="neo-input text-xs font-bold"></select>
@@ -69,58 +80,54 @@
                     <label class="text-[9px] font-bold text-gray-400 uppercase">Service</label>
                     <select id="serviceSelect" onchange="calcTotal()" class="neo-input text-xs font-bold"></select>
                 </div>
-                <input type="text" id="orderLink" placeholder="Order Link (https://...)" class="neo-input text-xs font-bold">
+                <input type="text" id="orderLink" placeholder="Paste Link Here" class="neo-input text-xs font-bold">
                 <div class="grid grid-cols-2 gap-3">
                     <input type="number" id="orderQty" oninput="calcTotal()" placeholder="Quantity" class="neo-input text-xs font-bold">
                     <div class="bg-blue-500/10 border border-blue-500/20 rounded-xl px-4 flex items-center justify-center text-green-400 font-bold text-xs" id="autoPrice">₹0.00</div>
                 </div>
-                <button onclick="placeOrder()" id="buyBtn" class="w-full bg-blue-600 py-4 rounded-xl font-black uppercase text-xs tracking-widest shadow-lg">SUBMIT ORDER</button>
+                <button onclick="placeOrder()" id="buyBtn" class="w-full bg-blue-600 py-4 rounded-xl font-black uppercase text-xs tracking-widest shadow-lg hover:bg-blue-700 transition">SUBMIT ORDER</button>
+            </div>
+        </div>
+
+        <div id="profileTab" class="tab-content space-y-4">
+            <div class="glass p-8 text-center space-y-4 flip-card">
+                <img id="pImg" class="w-24 h-24 rounded-full mx-auto border-4 border-blue-500 shadow-xl" src="">
+                <div>
+                    <h3 id="pName" class="text-xl font-black uppercase">Member</h3>
+                    <p id="pEmail" class="text-xs text-gray-500">Connected</p>
+                </div>
+                <div class="bg-white/5 p-4 rounded-2xl border border-white/5">
+                    <p class="text-[10px] text-gray-400 uppercase font-bold">Current UID</p>
+                    <p id="pUid" class="text-[10px] font-mono text-blue-400 break-all"></p>
+                </div>
+                <button onclick="logout()" class="w-full bg-red-600/20 text-red-500 py-4 rounded-xl font-black uppercase text-xs border border-red-500/20 hover:bg-red-600 hover:text-white transition">Logout Account</button>
             </div>
         </div>
 
         <div id="adminPanel" class="hidden space-y-4 mt-6">
-            <div class="glass p-5 border border-red-500/50">
-                <h3 class="text-red-500 font-black text-[10px] uppercase mb-4 text-center tracking-widest">GOD MODE - MASTER ADMIN</h3>
-                
+            <div class="glass p-5 border border-red-500/50 flip-card">
+                <h3 class="text-red-500 font-black text-[10px] uppercase mb-4 text-center tracking-widest">GOD MODE CONTROL</h3>
                 <div class="space-y-4">
-                    <div class="p-3 bg-white/5 rounded-xl space-y-2">
-                        <p class="text-[9px] font-bold text-gray-400 uppercase">User Control (UID)</p>
-                        <input id="targetUid" placeholder="User UID" class="neo-input text-xs">
-                        <div class="grid grid-cols-2 gap-2">
-                            <button onclick="banUser()" class="bg-red-600 py-2 rounded-lg text-[10px] font-bold">BAN USER</button>
-                            <button onclick="unbanUser()" class="bg-green-600 py-2 rounded-lg text-[10px] font-bold">UNBAN USER</button>
-                        </div>
-                    </div>
-
-                    <div class="p-3 bg-white/5 rounded-xl space-y-2">
-                        <p class="text-[9px] font-bold text-gray-400 uppercase">Wallet Management</p>
-                        <input id="walletAmt" type="number" placeholder="Amount" class="neo-input text-xs">
-                        <div class="grid grid-cols-2 gap-2">
-                            <button onclick="walletAdd()" class="bg-green-600 py-2 rounded-lg text-[10px] font-bold">ADD CASH</button>
-                            <button onclick="walletDeduct()" class="bg-red-600 py-2 rounded-lg text-[10px] font-bold">DEDUCT CASH</button>
-                        </div>
-                    </div>
-
-                    <div class="p-3 bg-white/5 rounded-xl space-y-2">
-                        <p class="text-[9px] font-bold text-gray-400 uppercase">Order Control (ID)</p>
-                        <input id="orderId" placeholder="Order ID" class="neo-input text-xs">
-                        <div class="grid grid-cols-3 gap-1">
-                            <button onclick="adminOrder('cancel')" class="bg-red-600 py-2 rounded text-[8px] font-bold">CANCEL</button>
-                            <button onclick="adminOrder('refund')" class="bg-yellow-600 py-2 rounded text-[8px] font-bold">REFUND</button>
-                            <button onclick="adminOrder('force')" class="bg-blue-600 py-2 rounded text-[8px] font-bold">FORCE</button>
-                        </div>
-                    </div>
-
+                    <input id="targetUid" placeholder="User UID" class="neo-input text-xs">
                     <div class="grid grid-cols-2 gap-2">
-                        <button onclick="maintenanceOn()" class="bg-orange-600 py-3 rounded-xl text-[9px] font-bold">MAINTENANCE ON</button>
-                        <button onclick="maintenanceOff()" class="bg-slate-700 py-3 rounded-xl text-[9px] font-bold">MAINTENANCE OFF</button>
+                        <button onclick="banUser()" class="bg-red-600 py-2 rounded-lg text-[10px] font-bold uppercase">Ban</button>
+                        <button onclick="unbanUser()" class="bg-green-600 py-2 rounded-lg text-[10px] font-bold uppercase">Unban</button>
+                    </div>
+                    <input id="walletAmt" type="number" placeholder="Wallet Amount" class="neo-input text-xs">
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="walletAdd()" class="bg-green-600 py-2 rounded-lg text-[10px] font-bold uppercase">Add Cash</button>
+                        <button onclick="walletDeduct()" class="bg-red-600 py-2 rounded-lg text-[10px] font-bold uppercase">Deduct</button>
                     </div>
                 </div>
             </div>
         </div>
-
-        <button onclick="logout()" class="w-full mt-6 bg-slate-800 py-4 rounded-xl font-black text-red-500 uppercase text-xs">Logout Account</button>
     </main>
+
+    <nav class="bg-slate-900 border-t border-white/5 h-16 fixed bottom-0 w-full flex justify-around items-center z-50">
+        <button onclick="switchTab('homeTab')" class="nav-item nav-active transition-all"><i class="fas fa-home text-lg"></i></button>
+        <button onclick="switchTab('profileTab')" class="nav-item text-slate-500 transition-all"><i class="fas fa-user-circle text-lg"></i></button>
+        <button id="adminNav" onclick="switchTab('adminPanel')" class="nav-item text-slate-500 hidden"><i class="fas fa-shield-alt text-lg"></i></button>
+    </nav>
 </div>
 
 <script type="module">
@@ -129,25 +136,20 @@
     import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
     const firebaseConfig = {
-  apiKey: "AIzaSyCb6ogQAfpZMNsUYIzeghGzrpRzrIjLSkE",
-  authDomain: "dgsell-bb084.firebaseapp.com",
-  databaseURL: "https://dgsell-bb084-default-rtdb.firebaseio.com",
-  projectId: "dgsell-bb084",
-  storageBucket: "dgsell-bb084.firebasestorage.app",
-  messagingSenderId: "250296732434",
-  appId: "1:250296732434:web:324a5dc95723964db841cb",
-  measurementId: "G-F0LWW9N4CQ"
-};
+        apiKey: "AIzaSyCbOQZjrqbfr6r23MFNlDZavyB9AChK_XM",
+        authDomain: "smspanel-76488.firebaseapp.com",
+        databaseURL: "https://smspanel-76488-default-rtdb.firebaseio.com",
+        projectId: "smspanel-76488",
+        appId: "1:478520093402:web:bf976787e36af3017b13e3"
+    };
 
-    // Update with your Render URL
-    const BACKEND = "https://dg-service-backend.onrender.com"; 
+    const BACKEND = "https://dg-backend-production-ab50.up.railway.app"; 
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getDatabase(app);
     const provider = new GoogleAuthProvider();
-    let currentUser = null;
-    let allSvcs = [];
+    let currentUser = null, allSvcs = [];
 
     onAuthStateChanged(auth, u => {
         document.getElementById("loading").style.display = "none";
@@ -160,28 +162,42 @@
         document.getElementById("authScreen").classList.add("hidden");
         document.getElementById("appScreen").classList.remove("hidden");
 
+        // Auto Fetch Name/Photo from Google
+        document.getElementById("userName").innerText = u.displayName || u.email.split('@')[0];
+        document.getElementById("headerImg").src = u.photoURL || "https://ui-avatars.com/api/?name=User";
+        document.getElementById("pName").innerText = u.displayName || "Premium Member";
+        document.getElementById("pEmail").innerText = u.email || u.phoneNumber;
+        document.getElementById("pImg").src = u.photoURL || "https://ui-avatars.com/api/?name=User";
+        document.getElementById("pUid").innerText = u.uid;
+
         onValue(ref(db, "users/" + u.uid), (s) => {
-            const USER = s.val() || {};
-            if (USER.banned) { alert("Account Banned by Admin"); signOut(auth); return; }
-            document.getElementById("userName").innerText = u.email || u.phoneNumber || "Member";
-            document.getElementById("balance").innerText = "₹" + (USER.balance || 0).toFixed(2);
-            if (USER.role === "admin") document.getElementById("adminPanel").classList.remove("hidden");
+            const USER_DATA = s.val() || {};
+            if (USER_DATA.banned) { alert("Forbidden: Your account is banned."); signOut(auth); return; }
+            document.getElementById("balance").innerText = "₹" + (USER_DATA.balance || 0).toFixed(2);
+            if (USER_DATA.role === "admin") {
+                document.getElementById("adminNav").classList.remove("hidden");
+            }
         });
         fetchServices();
     });
 
-    /* --- AUTH FUNCTIONS --- */
+    /* --- AUTH --- */
     window.emailLogin = () => signInWithEmailAndPassword(auth, email.value, pass.value);
     window.emailSignup = () => createUserWithEmailAndPassword(auth, email.value, pass.value);
     window.googleLogin = () => signInWithPopup(auth, provider);
     window.phoneLogin = () => {
         window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", { size: "invisible" });
-        signInWithPhoneNumber(auth, phone.value, recaptchaVerifier).then(r => window.confirmation = r);
+        signInWithPhoneNumber(auth, phone.value, recaptchaVerifier).then(r => {
+            window.confirmation = r;
+            document.getElementById("otp").classList.remove("hidden");
+            document.getElementById("verifyBtn").classList.remove("hidden");
+            alert("OTP Sent!");
+        });
     };
     window.verifyOTP = () => confirmation.confirm(otp.value);
     window.logout = () => signOut(auth).then(() => location.reload());
 
-    /* --- ORDER SYSTEM (SMM Style) --- */
+    /* --- ORDER SYSTEM --- */
     async function fetchServices() {
         try {
             const res = await fetch(`${BACKEND}/services`);
@@ -189,7 +205,7 @@
             const cats = [...new Set(allSvcs.map(s => s.category))];
             document.getElementById('catSelect').innerHTML = cats.map(c => `<option value="${c}">${c}</option>`).join('');
             filterServices();
-        } catch (e) { console.error("Backend offline"); }
+        } catch (e) { console.error("Railway Down"); }
     }
 
     window.filterServices = () => {
@@ -209,40 +225,43 @@
         document.getElementById('autoPrice').innerText = "₹" + total.toFixed(2);
     };
 
-    // FAST ORDER (No Wait Time)
     window.placeOrder = async () => {
         const buyBtn = document.getElementById('buyBtn');
         const qty = document.getElementById('orderQty').value;
         const link = document.getElementById('orderLink').value;
         const serviceId = document.getElementById('serviceSelect').selectedOptions[0].getAttribute('data-id');
 
-        if(!link || qty < 1) return alert("Fill Order Details");
-        buyBtn.innerText = "PLACING ORDER...";
+        if(!link || qty < 1) return alert("Fill details!");
+        buyBtn.innerText = "Processing...";
         buyBtn.disabled = true;
 
         try {
             const res = await fetch(`${BACKEND}/buy`, {
                 method: "POST",
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ uid: currentUser.uid, service: serviceId, link: link, quantity: qty })
+                body: JSON.stringify({ uid: currentUser.uid, service: serviceId, link, quantity: qty })
             });
-            if(res.ok) alert("Order Success!");
-            else alert("Error: Check Balance");
-        } catch(e) { alert("Server Error"); }
+            if(res.ok) alert("Order Placed!");
+            else alert("Balance Low!");
+        } catch(e) { alert("API Error"); }
         finally { buyBtn.innerText = "SUBMIT ORDER"; buyBtn.disabled = false; }
     };
 
-    /* --- ADMIN GOD MODE FUNCTIONS --- */
-    const adminCall = (path, data) => fetch(`${BACKEND}${path}`, { method: "POST", headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data) }).then(r => r.ok ? alert("Action Done") : alert("Failed"));
+    /* --- ADMIN GOD MODE --- */
+    const adminAction = (path, data) => fetch(`${BACKEND}${path}`, { method: "POST", headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data) }).then(r => r.ok ? alert("Done") : alert("Error"));
 
-    window.banUser = () => adminCall("/admin/user/ban", { uid: targetUid.value });
-    window.unbanUser = () => adminCall("/admin/user/unban", { uid: targetUid.value });
-    window.walletAdd = () => adminCall("/admin/wallet/add", { uid: targetUid.value, amt: walletAmt.value });
-    window.walletDeduct = () => adminCall("/admin/wallet/deduct", { uid: targetUid.value, amt: walletAmt.value });
-    window.adminOrder = (a) => adminCall(`/admin/order/${a}`, { id: orderId.value });
-    window.maintenanceOn = () => adminCall("/admin/system/maintenance", { on: true });
-    window.maintenanceOff = () => adminCall("/admin/system/maintenance", { on: false });
+    window.banUser = () => adminAction("/admin/user/ban", { uid: targetUid.value });
+    window.unbanUser = () => adminAction("/admin/user/unban", { uid: targetUid.value });
+    window.walletAdd = () => adminAction("/admin/wallet/add", { uid: targetUid.value, amt: walletAmt.value });
+    window.walletDeduct = () => adminAction("/admin/wallet/deduct", { uid: targetUid.value, amt: walletAmt.value });
 
+    /* --- TAB SWITCHER --- */
+    window.switchTab = (id) => {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.replace('nav-active', 'text-slate-500'));
+        event.currentTarget.classList.add('nav-active');
+    };
 </script>
 </body>
 </html>
